@@ -1,4 +1,4 @@
-import MemoryJournal from '../components/memory-journal'
+import MemoryJournal from '../components/memory/memory-journal'
 
 export default function Home() {
   return (

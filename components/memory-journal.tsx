@@ -392,7 +392,6 @@ export default function MemoryJournal() {
                   ease: [0.4, 0, 0.2, 1]
                 }
               }}
-              className="mt-6 bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden relative"
             >
               <div className="absolute top-4 right-4">
                 {!isEditing && (
