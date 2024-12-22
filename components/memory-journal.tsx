@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react'
 import { format, eachDayOfInterval, isSameDay, getMonth, getDay, addDays, subDays } from 'date-fns'
-import { motion, AnimatePresence, LayoutGroup } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
@@ -10,6 +10,8 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { MoreVertical } from "lucide-react"
 
 type Memory = {
   id: string
@@ -141,112 +143,130 @@ export default function MemoryJournal() {
   }
 
   return (
-    <LayoutGroup>
+    <>
       <motion.div 
-        layout
+        layout="size"
         className="relative p-4 rounded-lg border bg-white dark:bg-gray-950 shadow-sm overflow-hidden"
         style={{
           width: `${componentWidth}px`,
           minWidth: `${componentWidth}px`,
           maxWidth: '100%',
         }}
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
         transition={{
-          layout: { duration: 0.2, ease: "easeInOut" }
+          layout: { duration: 0.6, type: "spring", bounce: 0.35 },
+          scale: { duration: 0.4, type: "spring", bounce: 0.3 }
         }}
       >
-        <motion.div layout="position">
-          <motion.div layout="position" className="flex justify-between items-center mb-2 h-10">
-            <motion.h2 
-              layout="position"
-              className="text-base font-semibold text-gray-900 dark:text-gray-100"
-            >
+        <div>
+          <div className="flex justify-between items-center mb-2 h-10">
+            <h2 className="text-base font-semibold text-gray-900 dark:text-gray-100">
               {memories.length} memories together
-            </motion.h2>
-            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-              <DialogTrigger asChild>
-                <Button variant="outline">Add Memory</Button>
-              </DialogTrigger>
-              <DialogContent className="max-w-3xl">
-                <DialogHeader>
-                  <DialogTitle>Add a New Memory</DialogTitle>
-                </DialogHeader>
-                <div className="grid gap-4 py-4">
-                  <div className="grid grid-cols-4 items-center gap-4">
-                    <Label htmlFor="date" className="text-right">
-                      Date
-                    </Label>
-                    <Input
-                      id="date"
-                      type="date"
-                      value={newMemory.date ? format(newMemory.date, 'yyyy-MM-dd') : ''}
-                      onChange={(e) => setNewMemory(prev => ({ ...prev, date: new Date(e.target.value) }))}
-                      className="col-span-3"
-                    />
-                  </div>
-                  <div className="grid grid-cols-4 items-center gap-4">
-                    <Label htmlFor="description" className="text-right">
-                      Description
-                    </Label>
-                    <Input
-                      id="description"
-                      value={newMemory.description}
-                      onChange={(e) => setNewMemory(prev => ({ ...prev, description: e.target.value }))}
-                      className="col-span-3"
-                    />
-                  </div>
-                  <div className="grid grid-cols-4 items-center gap-4">
-                    <Label htmlFor="journalEntry" className="text-right">
-                      Journal Entry
-                    </Label>
-                    <Textarea
-                      id="journalEntry"
-                      value={newMemory.journalEntry}
-                      onChange={(e) => setNewMemory(prev => ({ ...prev, journalEntry: e.target.value }))}
-                      className="col-span-3"
-                      rows={5}
-                    />
-                  </div>
-                  <div className="grid grid-cols-4 items-center gap-4">
-                    <Label htmlFor="intensity" className="text-right">
-                      Intensity
-                    </Label>
-                    <Input
-                      id="intensity"
-                      type="number"
-                      min="1"
-                      max="4"
-                      value={newMemory.intensity}
-                      onChange={(e) => setNewMemory(prev => ({ ...prev, intensity: parseInt(e.target.value) as 1 | 2 | 3 | 4 }))}
-                      className="col-span-3"
-                    />
-                  </div>
-                  <div className="grid grid-cols-4 items-center gap-4">
-                    <Label htmlFor="photo" className="text-right">
-                      Photo
-                    </Label>
-                    <Input
-                      id="photo"
-                      type="file"
-                      accept="image/*"
-                      onChange={handlePhotoUpload}
-                      className="col-span-3"
-                    />
-                  </div>
-                  {newMemory.photo && (
-                    <div className="col-span-4 flex justify-center">
-                      <div className="polaroid">
-                        <img src={newMemory.photo} alt="Memory preview" className="w-full h-auto" />
-                        <div className="caption text-sm">{newMemory.description || 'New memory'}</div>
-                      </div>
+            </h2>
+            <div className="flex items-center gap-2">
+              <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                <DialogTrigger asChild>
+                  <motion.div
+                    whileHover={{ 
+                      scale: 1.03,
+                      rotate: 0.5,
+                      transition: {
+                        type: "spring",
+                        stiffness: 400,
+                        damping: 10
+                      }
+                    }}
+                    whileTap={{ 
+                      scale: 0.97,
+                      rotate: -0.5
+                    }}
+                  >
+                    <Button variant="outline">Add Memory</Button>
+                  </motion.div>
+                </DialogTrigger>
+                <DialogContent className="max-w-xl">
+                  <DialogHeader>
+                    <DialogTitle>Add a New Memory</DialogTitle>
+                  </DialogHeader>
+                  <div className="grid gap-4 py-4">
+                    <div className="grid grid-cols-4 items-center gap-4">
+                      <Label htmlFor="date" className="text-right">
+                        Date
+                      </Label>
+                      <Input
+                        id="date"
+                        type="date"
+                        value={newMemory.date ? format(newMemory.date, 'yyyy-MM-dd') : ''}
+                        onChange={(e) => setNewMemory(prev => ({ ...prev, date: new Date(e.target.value) }))}
+                        className="col-span-3"
+                      />
                     </div>
-                  )}
-                </div>
-                <Button onClick={handleAddMemory}>Add Memory</Button>
-              </DialogContent>
-            </Dialog>
-          </motion.div>
+                    <div className="grid grid-cols-4 items-center gap-4">
+                      <Label htmlFor="description" className="text-right">
+                        Description
+                      </Label>
+                      <Input
+                        id="description"
+                        value={newMemory.description}
+                        onChange={(e) => setNewMemory(prev => ({ ...prev, description: e.target.value }))}
+                        className="col-span-3"
+                      />
+                    </div>
+                    <div className="grid grid-cols-4 items-center gap-4">
+                      <Label htmlFor="journalEntry" className="text-right">
+                        Journal Entry
+                      </Label>
+                      <Textarea
+                        id="journalEntry"
+                        value={newMemory.journalEntry}
+                        onChange={(e) => setNewMemory(prev => ({ ...prev, journalEntry: e.target.value }))}
+                        className="col-span-3"
+                        rows={5}
+                      />
+                    </div>
+                    <div className="grid grid-cols-4 items-center gap-4">
+                      <Label htmlFor="intensity" className="text-right">
+                        Intensity
+                      </Label>
+                      <Input
+                        id="intensity"
+                        type="number"
+                        min="1"
+                        max="4"
+                        value={newMemory.intensity}
+                        onChange={(e) => setNewMemory(prev => ({ ...prev, intensity: parseInt(e.target.value) as 1 | 2 | 3 | 4 }))}
+                        className="col-span-3"
+                      />
+                    </div>
+                    <div className="grid grid-cols-4 items-center gap-4">
+                      <Label htmlFor="photo" className="text-right">
+                        Photo
+                      </Label>
+                      <Input
+                        id="photo"
+                        type="file"
+                        accept="image/*"
+                        onChange={handlePhotoUpload}
+                        className="col-span-3"
+                      />
+                    </div>
+                    {newMemory.photo && (
+                      <div className="col-span-4 flex justify-center">
+                        <div className="polaroid">
+                          <img src={newMemory.photo} alt="Memory preview" className="w-full h-auto" />
+                          <div className="caption text-sm">{newMemory.description || 'New memory'}</div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                  <Button onClick={handleAddMemory}>Add Memory</Button>
+                </DialogContent>
+              </Dialog>
+            </div>
+          </div>
 
-          <motion.div layout="position" className="flex flex-col mt-8">
+          <div className="flex flex-col mt-8">
             {/* Month labels */}
             <div className="flex ml-[44px] mb-1 text-xs text-gray-400" style={{ width: `${graphWidth - 44}px` }}>
               {monthLabels.map((month, index) => (
@@ -291,8 +311,24 @@ export default function MemoryJournal() {
                               <motion.div
                                 className={`w-[10px] h-[10px] rounded-sm ${date ? intensityColors[memory?.intensity || 0] : 'bg-transparent'}
                                   ${date ? 'cursor-pointer' : ''}`}
-                                whileHover={date ? { scale: 1.2 } : {}}
-                                whileTap={date ? { scale: 0.9 } : {}}
+                                whileHover={date ? { 
+                                  scale: 1.45,
+                                  rotate: 3,
+                                  transition: { 
+                                    type: "spring",
+                                    stiffness: 400,
+                                    damping: 15
+                                  }
+                                } : {}}
+                                whileTap={date ? { 
+                                  scale: 0.9,
+                                  rotate: -3,
+                                  transition: { 
+                                    type: "spring",
+                                    stiffness: 400,
+                                    damping: 15
+                                  }
+                                } : {}}
                                 onClick={() => date && setSelectedMemory(prev => prev?.id === memory?.id ? null : (memory || null))}
                                 tabIndex={date ? 0 : -1}
                                 role={date ? "button" : "presentation"}
@@ -320,9 +356,9 @@ export default function MemoryJournal() {
                 ))}
               </div>
             </div>
-          </motion.div>
+          </div>
 
-          <motion.div layout="position" className="mt-4 flex items-center gap-1 text-xs text-gray-600 dark:text-gray-400">
+          <div className="mt-4 flex items-center gap-1 text-xs text-gray-600 dark:text-gray-400">
             <span>Less</span>
             {[0, 1, 2, 3, 4].map((intensity) => (
               <div 
@@ -331,26 +367,86 @@ export default function MemoryJournal() {
               />
             ))}
             <span>More</span>
-          </motion.div>
-        </motion.div>
+          </div>
+        </div>
 
-        <AnimatePresence presenceAffectsLayout>
+        <AnimatePresence mode="sync">
           {selectedMemory && (
             <motion.div
-              layout
+              layout="position"
               key="selected-memory"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{
-                opacity: { duration: 0.2 },
-                layout: { duration: 0.3, ease: "easeInOut" }
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ 
+                opacity: 1, 
+                height: "auto",
+                transition: {
+                  duration: 0.2,
+                  ease: [0.4, 0, 0.2, 1]
+                }
               }}
-              className="mt-6 bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden"
+              exit={{ 
+                opacity: 0, 
+                height: 0,
+                transition: {
+                  duration: 0.2,
+                  ease: [0.4, 0, 0.2, 1]
+                }
+              }}
+              className="mt-6 bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden relative"
             >
-              <motion.div layout className="p-8">
+              <div className="absolute top-4 right-4">
+                {!isEditing && (
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <motion.div
+                        whileHover={{ 
+                          scale: 1.05,
+                          transition: {
+                            type: "spring",
+                            stiffness: 400,
+                            damping: 10
+                          }
+                        }}
+                        whileTap={{ scale: 0.95 }}
+                      >
+                        <Button variant="ghost" size="icon" className="h-8 w-8">
+                          <MoreVertical className="h-4 w-4" />
+                        </Button>
+                      </motion.div>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem onClick={() => setIsEditing(true)}>
+                        Edit
+                      </DropdownMenuItem>
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <DropdownMenuItem 
+                            className="text-red-600 dark:text-red-400"
+                            onSelect={(e) => e.preventDefault()}
+                          >
+                            Delete
+                          </DropdownMenuItem>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              This action cannot be undone. This will permanently delete your memory.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogAction onClick={handleDeleteMemory}>Delete</AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                )}
+              </div>
+              <div className="p-8">
                 <div className="flex flex-col md:flex-row gap-8">
-                  <div className="w-full md:w-1/3 flex flex-col">
+                  <div className="w-full md:w-1/3">
                     <div className="polaroid mb-6">
                       {selectedMemory.photo ? (
                         <img src={selectedMemory.photo} alt="Memory" className="w-full h-auto rounded-sm" />
@@ -361,120 +457,179 @@ export default function MemoryJournal() {
                         <span className="text-sm">{selectedMemory.description}</span>
                       </div>
                     </div>
-                    <div className="mt-auto">
-                      <div className="flex justify-between items-center">
-                        {!isEditing && (
-                          <>
-                            <Button onClick={() => setIsEditing(true)} variant="outline" size="sm">
-                              Edit
-                            </Button>
-                            <AlertDialog>
-                              <AlertDialogTrigger asChild>
-                                <Button variant="ghost" size="sm" className="text-red-500 hover:text-red-700">Delete</Button>
-                              </AlertDialogTrigger>
-                              <AlertDialogContent>
-                                <AlertDialogHeader>
-                                  <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                                  <AlertDialogDescription>
-                                    This action cannot be undone. This will permanently delete your memory.
-                                  </AlertDialogDescription>
-                                </AlertDialogHeader>
-                                <AlertDialogFooter>
-                                  <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                  <AlertDialogAction onClick={handleDeleteMemory}>Delete</AlertDialogAction>
-                                </AlertDialogFooter>
-                              </AlertDialogContent>
-                            </AlertDialog>
-                          </>
-                        )}
-                      </div>
-                    </div>
                   </div>
                   <div className="w-full md:w-2/3">
-                    {isEditing ? (
-                      <div className="grid gap-6">
-                        <div className="grid grid-cols-4 items-center gap-4">
-                          <Label htmlFor="edit-date" className="text-right">
-                            Date
-                          </Label>
-                          <Input
-                            id="edit-date"
-                            type="date"
-                            value={format(selectedMemory.date, 'yyyy-MM-dd')}
-                            onChange={(e) => setSelectedMemory(prev => prev ? { ...prev, date: new Date(e.target.value) } : null)}
-                            className="col-span-3"
-                          />
-                        </div>
-                        <div className="grid grid-cols-4 items-center gap-4">
-                          <Label htmlFor="edit-description" className="text-right">
-                            Description
-                          </Label>
-                          <Input
-                            id="edit-description"
-                            value={selectedMemory.description}
-                            onChange={(e) => setSelectedMemory(prev => prev ? { ...prev, description: e.target.value } : null)}
-                            className="col-span-3"
-                          />
-                        </div>
-                        <div className="grid grid-cols-4 items-start gap-4">
-                          <Label htmlFor="edit-journalEntry" className="text-right mt-2">
-                            Journal Entry
-                          </Label>
-                          <Textarea
-                            id="edit-journalEntry"
-                            value={selectedMemory.journalEntry}
-                            onChange={(e) => setSelectedMemory(prev => prev ? { ...prev, journalEntry: e.target.value } : null)}
-                            className="col-span-3"
-                            rows={8}
-                          />
-                        </div>
-                        <div className="grid grid-cols-4 items-center gap-4">
-                          <Label htmlFor="edit-intensity" className="text-right">
-                            Intensity
-                          </Label>
-                          <Input
-                            id="edit-intensity"
-                            type="number"
-                            min="1"
-                            max="4"
-                            value={selectedMemory.intensity}
-                            onChange={(e) => setSelectedMemory(prev => prev ? { ...prev, intensity: parseInt(e.target.value) as 1 | 2 | 3 | 4 } : null)}
-                            className="col-span-3"
-                          />
-                        </div>
-                        <div className="grid grid-cols-4 items-center gap-4">
-                          <Label htmlFor="edit-photo" className="text-right">
-                            Photo
-                          </Label>
-                          <Input
-                            id="edit-photo"
-                            type="file"
-                            accept="image/*"
-                            onChange={handlePhotoUpload}
-                            className="col-span-3"
-                          />
-                        </div>
-                        <div className="flex justify-end gap-2 mt-4">
-                          <Button onClick={() => setIsEditing(false)} variant="outline">Cancel</Button>
-                          <Button onClick={handleEditMemory}>Save Changes</Button>
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="prose dark:prose-invert max-w-none">
-                        <h2 className="text-2xl font-semibold mb-4">{format(selectedMemory.date, 'MMMM d, yyyy')}</h2>
-                        <p className="text-gray-700 dark:text-gray-300 whitespace-pre-wrap leading-relaxed">
-                          {selectedMemory.journalEntry || 'No journal entry for this memory.'}
-                        </p>
-                      </div>
-                    )}
+                    <AnimatePresence mode="wait" initial={false}>
+                      {isEditing ? (
+                        <motion.div
+                          key="edit"
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          exit={{ opacity: 0 }}
+                          transition={{ duration: 0.15 }}
+                          className="grid gap-6"
+                        >
+                          <motion.div
+                            variants={{
+                              hidden: { opacity: 0, y: 20 },
+                              visible: { 
+                                opacity: 1, 
+                                y: 0,
+                                transition: {
+                                  type: "spring",
+                                  stiffness: 260,
+                                  damping: 20
+                                }
+                              }
+                            }}
+                          >
+                            <div className="grid grid-cols-4 items-center gap-4">
+                              <Label htmlFor="edit-date" className="text-right">
+                                Date
+                              </Label>
+                              <Input
+                                id="edit-date"
+                                type="date"
+                                value={format(selectedMemory.date, 'yyyy-MM-dd')}
+                                onChange={(e) => setSelectedMemory(prev => prev ? { ...prev, date: new Date(e.target.value) } : null)}
+                                className="col-span-3"
+                              />
+                            </div>
+                          </motion.div>
+                          <motion.div
+                            variants={{
+                              hidden: { opacity: 0, y: 20 },
+                              visible: { 
+                                opacity: 1, 
+                                y: 0,
+                                transition: {
+                                  type: "spring",
+                                  stiffness: 260,
+                                  damping: 20
+                                }
+                              }
+                            }}
+                          >
+                            <div className="grid grid-cols-4 items-center gap-4">
+                              <Label htmlFor="edit-description" className="text-right">
+                                Description
+                              </Label>
+                              <Input
+                                id="edit-description"
+                                value={selectedMemory.description}
+                                onChange={(e) => setSelectedMemory(prev => prev ? { ...prev, description: e.target.value } : null)}
+                                className="col-span-3"
+                              />
+                            </div>
+                          </motion.div>
+                          <motion.div
+                            variants={{
+                              hidden: { opacity: 0, y: 20 },
+                              visible: { 
+                                opacity: 1, 
+                                y: 0,
+                                transition: {
+                                  type: "spring",
+                                  stiffness: 260,
+                                  damping: 20
+                                }
+                              }
+                            }}
+                          >
+                            <div className="grid grid-cols-4 items-start gap-4">
+                              <Label htmlFor="edit-journalEntry" className="text-right mt-2">
+                                Journal Entry
+                              </Label>
+                              <Textarea
+                                id="edit-journalEntry"
+                                value={selectedMemory.journalEntry}
+                                onChange={(e) => setSelectedMemory(prev => prev ? { ...prev, journalEntry: e.target.value } : null)}
+                                className="col-span-3"
+                                rows={8}
+                              />
+                            </div>
+                          </motion.div>
+                          <motion.div
+                            variants={{
+                              hidden: { opacity: 0, y: 20 },
+                              visible: { 
+                                opacity: 1, 
+                                y: 0,
+                                transition: {
+                                  type: "spring",
+                                  stiffness: 260,
+                                  damping: 20
+                                }
+                              }
+                            }}
+                          >
+                            <div className="grid grid-cols-4 items-center gap-4">
+                              <Label htmlFor="edit-intensity" className="text-right">
+                                Intensity
+                              </Label>
+                              <Input
+                                id="edit-intensity"
+                                type="number"
+                                min="1"
+                                max="4"
+                                value={selectedMemory.intensity}
+                                onChange={(e) => setSelectedMemory(prev => prev ? { ...prev, intensity: parseInt(e.target.value) as 1 | 2 | 3 | 4 } : null)}
+                                className="col-span-3"
+                              />
+                            </div>
+                          </motion.div>
+                          <motion.div
+                            variants={{
+                              hidden: { opacity: 0, y: 20 },
+                              visible: { 
+                                opacity: 1, 
+                                y: 0,
+                                transition: {
+                                  type: "spring",
+                                  stiffness: 260,
+                                  damping: 20
+                                }
+                              }
+                            }}
+                          >
+                            <div className="grid grid-cols-4 items-center gap-4">
+                              <Label htmlFor="edit-photo" className="text-right">
+                                Photo
+                              </Label>
+                              <Input
+                                id="edit-photo"
+                                type="file"
+                                accept="image/*"
+                                onChange={handlePhotoUpload}
+                                className="col-span-3"
+                              />
+                            </div>
+                          </motion.div>
+                        </motion.div>
+                      ) : (
+                        <motion.div
+                          key="view"
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          exit={{ opacity: 0 }}
+                          transition={{ duration: 0.15 }}
+                          className="prose dark:prose-invert max-w-none"
+                        >
+                          <h2 className="text-2xl font-semibold mb-4">{format(selectedMemory.date, 'MMMM d, yyyy')}</h2>
+                          <p className="text-gray-700 dark:text-gray-300 whitespace-pre-wrap leading-relaxed">
+                            {selectedMemory.journalEntry || 'No journal entry for this memory.'}
+                          </p>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
                   </div>
                 </div>
-              </motion.div>
+              </div>
             </motion.div>
           )}
         </AnimatePresence>
       </motion.div>
-    </LayoutGroup>
+    </>
   )
 }
 
