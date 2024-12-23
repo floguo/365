@@ -240,7 +240,7 @@ export function MemoryCard({
           )}
         </div>
 
-        <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute inset-0 pointer-events-none z-20">
           {!isEditing && (
             <>
               <div className="h-full flex items-center justify-between">
@@ -248,12 +248,13 @@ export function MemoryCard({
                   <motion.div
                     whileHover={{ scale: 1.1 }}
                     whileTap={{ scale: 0.95 }}
+                    className="relative z-20"
                   >
                     <Button
                       variant="ghost"
                       size="icon"
                       onClick={() => onPrev ? onPrev() : setEditedMemory(memories[memories.length - 1])}
-                      className="h-9 w-9 rounded-full bg-white/10 hover:bg-white/20 dark:bg-gray-800/10 dark:hover:bg-gray-800/20 backdrop-blur"
+                      className="h-9 w-9 rounded-full bg-white/10 hover:bg-white/20 dark:bg-gray-800/80 dark:hover:bg-gray-800/90 backdrop-blur-sm shadow-sm"
                     >
                       <ChevronLeft className="h-5 w-5" />
                     </Button>
@@ -264,12 +265,13 @@ export function MemoryCard({
                   <motion.div
                     whileHover={{ scale: 1.1 }}
                     whileTap={{ scale: 0.95 }}
+                    className="relative z-20"
                   >
                     <Button
                       variant="ghost"
                       size="icon"
                       onClick={() => onNext ? onNext() : setEditedMemory(memories[0])}
-                      className="h-9 w-9 rounded-full bg-white/10 hover:bg-white/20 dark:bg-gray-800/10 dark:hover:bg-gray-800/20 backdrop-blur"
+                      className="h-9 w-9 rounded-full bg-white/10 hover:bg-white/20 dark:bg-gray-800/80 dark:hover:bg-gray-800/90 backdrop-blur-sm shadow-sm"
                     >
                       <ChevronRight className="h-5 w-5" />
                     </Button>
@@ -286,18 +288,18 @@ export function MemoryCard({
 
         <div className="p-8 pt-16">
           <div className="flex flex-col md:flex-row gap-8">
-            <div className="w-full md:w-1/3">
+            <div className="w-full md:w-1/3 flex-shrink-0">
               <PhotoFrame
-                src={editedMemory.photo}
-                alt="Memory"
-                caption={editedMemory.description}
-                style={editedMemory.frameStyle || "polaroid"}
-                effect={editedMemory.photoEffect || "none"}
-                className="mb-6"
+                src={memory.photo}
+                alt={memory.description}
+                caption={memory.description}
+                style={memory.frameStyle || "polaroid"}
+                effect={memory.photoEffect || "none"}
+                className="mb-6 max-w-full"
               />
             </div>
 
-            <div className="w-full md:w-2/3">
+            <div className="w-full md:w-2/3 min-w-0">
               <AnimatePresence mode="wait" initial={false}>
                 {isEditing ? (
                   <EditForm 

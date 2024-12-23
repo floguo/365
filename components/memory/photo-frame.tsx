@@ -22,26 +22,48 @@ const frameStyles = {
 
 function ChristmasLights() {
   return (
-    <div className="absolute -top-3 left-0 right-0 flex justify-around">
-      {[...Array(8)].map((_, i) => (
-        <motion.div
-          key={i}
-          className="w-2 h-2 rounded-full"
-          style={{
-            backgroundColor: ['#ff0000', '#00ff00', '#0000ff', '#ffff00'][i % 4]
-          }}
-          animate={{
-            opacity: [0.4, 1, 0.4],
-            scale: [0.8, 1.2, 0.8],
-          }}
-          transition={{
-            duration: 2,
-            repeat: Infinity,
-            delay: i * 0.2,
-          }}
-        />
-      ))}
-    </div>
+    <>
+      <div className="absolute -top-2 left-0 right-0 h-[2px] bg-gray-400/20" />
+      
+      <div className="absolute -top-3 left-0 right-0 flex justify-around">
+        {[...Array(12)].map((_, i) => (
+          <motion.div
+            key={i}
+            className="relative"
+          >
+            <motion.div
+              className="w-3 h-3 rounded-full relative"
+              style={{
+                backgroundColor: [
+                  '#ff4444', // red
+                  '#44ff44', // green
+                  '#4444ff', // blue
+                  '#ffff44', // yellow
+                  '#ff44ff'  // purple
+                ][i % 5],
+                boxShadow: `0 0 10px ${[
+                  '#ff000088',
+                  '#00ff0088',
+                  '#0000ff88',
+                  '#ffff0088',
+                  '#ff00ff88'
+                ][i % 5]}`
+              }}
+              animate={{
+                opacity: [0.5, 1, 0.5],
+                scale: [0.8, 1, 0.8],
+              }}
+              transition={{
+                duration: 1.5 + Math.random(),
+                repeat: Infinity,
+                delay: i * 0.1,
+              }}
+            />
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1px] h-1 bg-gray-400/20" />
+          </motion.div>
+        ))}
+      </div>
+    </>
   )
 }
 
@@ -122,10 +144,10 @@ export function PhotoFrame({
           <img 
             src={src} 
             alt={alt} 
-            className="w-full h-auto max-w-[300px] object-cover"
+            className="w-full h-auto object-cover aspect-square"
           />
         ) : (
-          <div className="w-full h-48 bg-gray-200 flex items-center justify-center text-gray-400">
+          <div className="w-full aspect-square bg-gray-200 flex items-center justify-center text-gray-400">
             No photo
           </div>
         )}

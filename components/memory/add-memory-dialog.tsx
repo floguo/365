@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
+import { X } from 'lucide-react'
 import type { AddMemoryDialogProps, Memory } from './types'
 
 export function AddMemoryDialog({
@@ -134,37 +135,55 @@ export function AddMemoryDialog({
               className="col-span-3"
             />
           </div>
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="photo" className="text-right">
+          <div className="grid grid-cols-4 items-start gap-4">
+            <Label htmlFor="photo" className="text-right mt-2">
               Photo
             </Label>
-            <Input
-              id="photo"
-              type="file"
-              accept="image/*"
-              onChange={handlePhotoUpload}
-              className="col-span-3"
-            />
-          </div>
-          {newMemory.photo && (
-            <motion.div 
-              className="col-span-4 flex justify-center"
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ 
-                opacity: 1, 
-                scale: 1,
-                transition: {
-                  duration: 0.3,
-                  ease: [0.4, 0, 0.2, 1]
-                }
-              }}
-            >
-              <div className="polaroid">
-                <img src={newMemory.photo} alt="Memory preview" className="w-full h-auto" />
-                <div className="caption text-sm">{newMemory.description || 'New memory'}</div>
+            <div className="col-span-3 space-y-4">
+              <div className="flex items-center gap-2">
+                <Button 
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => document.getElementById('photo')?.click()}
+                >
+                  Choose File
+                </Button>
+                <span className="text-sm text-gray-500 dark:text-gray-400 truncate">
+                  {newMemory.photo ? 'Photo selected' : 'No file chosen'}
+                </span>
+                <Input
+                  id="photo"
+                  type="file"
+                  accept="image/*"
+                  onChange={handlePhotoUpload}
+                  className="hidden"
+                />
               </div>
-            </motion.div>
-          )}
+
+              {newMemory.photo && (
+                <motion.div 
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="relative w-full max-w-[200px] aspect-square rounded-lg overflow-hidden border dark:border-gray-800"
+                >
+                  <img 
+                    src={newMemory.photo} 
+                    alt="Preview" 
+                    className="w-full h-full object-cover"
+                  />
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="absolute top-2 right-2 bg-black/20 hover:bg-black/40 backdrop-blur-sm"
+                    onClick={() => setNewMemory(prev => ({ ...prev, photo: undefined }))}
+                  >
+                    <X className="h-4 w-4 text-white" />
+                  </Button>
+                </motion.div>
+              )}
+            </div>
+          </div>
         </motion.div>
         <motion.div
           initial={{ opacity: 0 }}
