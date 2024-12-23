@@ -24,6 +24,20 @@ export default function MemoryJournal() {
 
   const { grid, monthLabels, graphWidth, componentWidth } = useMemoryGrid()
 
+  // Sort memories by date (newest first) and then by creation time
+  const sortedMemories = [...memories].sort((a, b) => {
+    const dateCompare = a.date.getTime() - b.date.getTime()
+    if (dateCompare === 0) {
+      // If same date, sort by ID (assuming ID is timestamp-based)
+      return a.id.localeCompare(b.id)
+    }
+    return dateCompare
+  })
+
+  const selectedMemoryIndex = selectedMemory 
+    ? sortedMemories.findIndex(m => m.id === selectedMemory.id)
+    : -1
+
   const handleAddMemory = (newMemory: Omit<Memory, "id">) => {
     const memoryToAdd: Memory = {
       ...newMemory,
@@ -45,6 +59,22 @@ export default function MemoryJournal() {
       setMemories(prev => prev.filter(memory => memory.id !== selectedMemory.id))
       setSelectedMemory(null)
     }
+  }
+
+  const handlePrevMemory = () => {
+    setSelectedMemory(
+      selectedMemoryIndex > 0 
+        ? sortedMemories[selectedMemoryIndex - 1]
+        : sortedMemories[sortedMemories.length - 1]
+    )
+  }
+
+  const handleNextMemory = () => {
+    setSelectedMemory(
+      selectedMemoryIndex < sortedMemories.length - 1
+        ? sortedMemories[selectedMemoryIndex + 1]
+        : sortedMemories[0]
+    )
   }
 
   return (
@@ -93,6 +123,12 @@ export default function MemoryJournal() {
             onClose={() => setSelectedMemory(null)}
             onEditStart={() => setIsEditing(true)}
             onEditCancel={() => setIsEditing(false)}
+            onPrev={handlePrevMemory}
+            onNext={handleNextMemory}
+            currentIndex={selectedMemoryIndex}
+            totalCount={sortedMemories.length}
+            memories={sortedMemories}
+            onSelectMemory={setSelectedMemory}
           />
         )}
       </AnimatePresence>

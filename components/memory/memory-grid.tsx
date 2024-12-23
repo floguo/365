@@ -11,9 +11,29 @@ export function MemoryGrid({
   graphWidth,
   onSelectMemory 
 }: MemoryGridProps) {
-  const getMemoryForDate = (date: Date | null) => {
-    if (!date) return null
-    return memories.find(memory => isSameDay(memory.date, date))
+  const getMemoriesForDate = (date: Date | null) => {
+    if (!date) return []
+    return memories
+      .filter(memory => 
+        memory.date.getFullYear() === date.getFullYear() &&
+        memory.date.getMonth() === date.getMonth() &&
+        memory.date.getDate() === date.getDate()
+      )
+      .sort((a, b) => {
+        // Sort chronologically (earliest first)
+        return a.id.localeCompare(b.id)
+      })
+  }
+
+  const getIntensityForDate = (date: Date | null) => {
+    if (!date) return 0
+    const dateMemories = getMemoriesForDate(date)
+    // Map number of memories to intensity levels (1-4)
+    if (dateMemories.length === 0) return 0
+    if (dateMemories.length === 1) return 1
+    if (dateMemories.length === 2) return 2
+    if (dateMemories.length === 3) return 3
+    return 4  // 4 or more memories
   }
 
   return (
@@ -54,13 +74,13 @@ export function MemoryGrid({
               }}
             >
               {row.map((date, colIndex) => {
-                const memory = getMemoryForDate(date)
+                const memory = getMemoriesForDate(date)
                 return (
                   <TooltipProvider key={colIndex}>
                     <Tooltip delayDuration={50}>
                       <TooltipTrigger asChild>
                         <motion.div
-                          className={`w-[10px] h-[10px] rounded-sm ${date ? intensityColors[memory?.intensity || 0] : 'bg-transparent'}
+                          className={`w-[10px] h-[10px] rounded-sm ${date ? intensityColors[getIntensityForDate(date) || 0] : 'bg-transparent'}
                             ${date ? 'cursor-pointer' : ''}`}
                           whileHover={date ? { 
                             scale: 1.45,
@@ -80,22 +100,44 @@ export function MemoryGrid({
                               damping: 15
                             }
                           } : {}}
-                          onClick={() => date && onSelectMemory(memory || null)}
+                          onClick={() => {
+                            if (date) {
+                              const dateMemories = getMemoriesForDate(date)
+                              // Select the earliest memory for that day
+                              const earliestMemory = dateMemories.length > 0 
+                                ? dateMemories[0]  // Already sorted chronologically
+                                : null
+                              onSelectMemory(earliestMemory)
+                            }
+                          }}
                           tabIndex={date ? 0 : -1}
                           role={date ? "button" : "presentation"}
                           aria-label={date ?
-                            (memory ?
-                              `Memory on ${format(date, 'MMM d, yyyy')}` :
-                              `No memory on ${format(date, 'MMM d, yyyy')}`) :
+                            (getMemoriesForDate(date).length > 0 ?
+                              `${getMemoriesForDate(date).length} ${
+                                getMemoriesForDate(date).length === 1 ? 'memory' : 'memories'
+                              } on ${format(date, 'MMM d, yyyy')}` :
+                              `No memories on ${format(date, 'MMM d, yyyy')}`) :
                             undefined}
                         />
                       </TooltipTrigger>
                       {date && (
                         <TooltipContent>
-                          {memory ? (
-                            <p>{format(date, 'MMM d, yyyy')}: {memory.description}</p>
-                          ) : (
-                            <p>{format(date, 'MMM d, yyyy')}: No memory</p>
+                          {date && (
+                            <>
+                              <p className="font-medium">{format(date, 'MMM d, yyyy')}</p>
+                              {memories.length > 0 ? (
+                                <ul className="mt-1 space-y-1">
+                                  {getMemoriesForDate(date).map(memory => (
+                                    <li key={memory.id} className="text-sm">
+                                      {memory.description}
+                                    </li>
+                                  ))}
+                                </ul>
+                              ) : (
+                                <p>No memories</p>
+                              )}
+                            </>
                           )}
                         </TooltipContent>
                       )}

@@ -6,6 +6,8 @@ export type Memory = {
   journalEntry?: string
   intensity: 1 | 2 | 3 | 4
   photo?: string
+  frameStyle?: PhotoFrameStyle
+  photoEffect?: PhotoEffect
 }
 
 export interface MemoryGridProps {
@@ -25,6 +27,12 @@ export interface MemoryCardProps {
   onClose: () => void
   onEditStart: () => void
   onEditCancel: () => void
+  onPrev?: () => void
+  onNext?: () => void
+  currentIndex: number
+  totalCount: number
+  memories: Memory[]
+  onSelectMemory: (memory: Memory) => void
 }
 
 export interface AddMemoryDialogProps {

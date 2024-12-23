@@ -66,6 +66,9 @@ body {
     --chart-4: 280 65% 60%;
     --chart-5: 340 75% 55%;
   }
+  .font-handwriting {
+    font-family: 'Kalam', cursive;
+  }
 }
 
 @layer base {

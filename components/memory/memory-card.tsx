@@ -1,14 +1,15 @@
-import { motion, AnimatePresence, usePresence } from 'framer-motion'
-import { format } from 'date-fns'
+import { motion, AnimatePresence, usePresence, useDragControls } from 'framer-motion'
+import { format, isSameDay } from 'date-fns'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog"
-import { MoreVertical } from "lucide-react"
+import { MoreVertical, ChevronLeft, ChevronRight } from "lucide-react"
 import { Memory, type MemoryCardProps } from './types'
 import { useState, useEffect, useRef } from 'react'
+import { PhotoEffect, PhotoFrame, PhotoFrameStyle } from './photo-frame'
 
 interface EditFormProps {
   memory: Memory
@@ -22,19 +23,64 @@ interface ViewModeProps {
   memory: Memory
 }
 
+function DateMemories({ 
+  date, 
+  memories, 
+  onSelect, 
+  selectedId,
+  onSelectMemory 
+}: {
+  date: Date
+  memories: Memory[]
+  onSelect: (memory: Memory) => void
+  selectedId: string
+  onSelectMemory: (memory: Memory) => void
+}) {
+  const dayMemories = memories
+    .filter(m => isSameDay(m.date, date))
+    .sort((a, b) => a.id.localeCompare(b.id))
+
+  return (
+    <div className="absolute top-4 left-4 z-10">
+      <div className="flex flex-col gap-1">
+        {dayMemories.map((memory) => (
+          <motion.button
+            key={memory.id}
+            onClick={() => onSelectMemory(memory)}
+            className={`px-2 py-1 text-sm rounded-md text-left hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors
+              ${memory.id === selectedId ? 'bg-gray-100 dark:bg-gray-700' : ''}`}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+          >
+            {memory.description}
+          </motion.button>
+        ))}
+      </div>
+    </div>
+  )
+}
+
 export function MemoryCard({ 
+  memories,
   memory,
   isEditing,
   onEdit,
   onDelete,
   onClose,
   onEditStart,
-  onEditCancel
+  onEditCancel,
+  onPrev,
+  onNext,
+  currentIndex,
+  totalCount,
+  onSelectMemory 
 }: MemoryCardProps) {
   const [editedMemory, setEditedMemory] = useState(memory)
   const [isPresent, safeToRemove] = usePresence()
   const [height, setHeight] = useState<number | "auto">("auto")
   const contentRef = useRef<HTMLDivElement>(null)
+  const dragControls = useDragControls()
+  const [dragDirection, setDragDirection] = useState<'left' | 'right' | null>(null)
 
   useEffect(() => {
     if (!isPresent) {
@@ -60,6 +106,17 @@ export function MemoryCard({
     }
   }
 
+  const handleDragEnd = (event: any, info: any) => {
+    const DRAG_THRESHOLD = 50
+    if (info.offset.x > DRAG_THRESHOLD && onNext) {
+      setDragDirection('right')
+      onNext()
+    } else if (info.offset.x < -DRAG_THRESHOLD && onPrev) {
+      setDragDirection('left')
+      onPrev()
+    }
+  }
+
   return (
     <motion.div
       layout="position"
@@ -69,11 +126,13 @@ export function MemoryCard({
         height,
         transition: {
           height: { 
-            duration: 0.3,
-            ease: [0.32, 0.72, 0, 1]
+            type: "spring",
+            stiffness: 100,
+            damping: 30,
+            mass: 0.8
           },
           opacity: { 
-            duration: 0.2
+            duration: 0.25
           }
         }
       }}
@@ -82,11 +141,11 @@ export function MemoryCard({
         height: 0,
         transition: {
           height: { 
-            duration: 0.3,
+            duration: 0.35,
             ease: [0.32, 0, 0.67, 0]
           },
           opacity: {
-            duration: 0.15
+            duration: 0.2
           }
         }
       }}
@@ -94,18 +153,43 @@ export function MemoryCard({
     >
       <motion.div
         ref={contentRef}
+        drag="x"
+        dragControls={dragControls}
+        dragConstraints={{ left: 0, right: 0 }}
+        dragElastic={0.2}
+        onDragEnd={handleDragEnd}
+        dragDirectionLock
         initial={false}
         animate={{ 
+          x: 0,
           y: 0, 
           opacity: 1,
+          scale: 1,
           transition: {
-            duration: 0.3,
-            ease: [0.32, 0.72, 0, 1]
+            x: { type: "spring", stiffness: 300, damping: 30 },
+            y: { type: "spring", stiffness: 100, damping: 20 },
+            opacity: { duration: 0.25 }
           }
         }}
-        className="bg-white dark:bg-gray-800 rounded-lg shadow-lg relative"
+        exit={{
+          x: dragDirection === 'left' ? -100 : dragDirection === 'right' ? 100 : 0,
+          opacity: 0,
+          transition: {
+            duration: 0.2,
+            ease: [0.32, 0, 0.67, 0]
+          }
+        }}
+        className="bg-white dark:bg-gray-800 rounded-lg relative"
       >
-        <div className="absolute top-4 right-4">
+        <DateMemories
+          date={memory.date}
+          memories={memories}
+          onSelect={m => onSelectMemory(m)}
+          selectedId={memory.id}
+          onSelectMemory={onSelectMemory}
+        />
+
+        <div className="absolute top-4 right-4 z-10">
           {!isEditing && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -156,21 +240,61 @@ export function MemoryCard({
           )}
         </div>
 
-        <div className="p-8">
-          <div className="flex flex-col md:flex-row gap-8">
-            <div className="w-full md:w-1/3">
-              <div className="polaroid mb-6">
-                {editedMemory.photo ? (
-                  <img src={editedMemory.photo} alt="Memory" className="w-full h-auto rounded-sm" />
-                ) : (
-                  <div className="w-full h-48 bg-gray-200 flex items-center justify-center text-gray-400 rounded-sm">
-                    No photo
-                  </div>
-                )}
-                <div className="caption mt-2">
-                  <span className="text-sm">{editedMemory.description}</span>
+        <div className="absolute inset-0 pointer-events-none">
+          {!isEditing && (
+            <>
+              <div className="h-full flex items-center justify-between">
+                <div className="pointer-events-auto pl-2">
+                  <motion.div
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => onPrev ? onPrev() : setEditedMemory(memories[memories.length - 1])}
+                      className="h-9 w-9 rounded-full bg-white/10 hover:bg-white/20 dark:bg-gray-800/10 dark:hover:bg-gray-800/20 backdrop-blur"
+                    >
+                      <ChevronLeft className="h-5 w-5" />
+                    </Button>
+                  </motion.div>
+                </div>
+
+                <div className="pointer-events-auto pr-2">
+                  <motion.div
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => onNext ? onNext() : setEditedMemory(memories[0])}
+                      className="h-9 w-9 rounded-full bg-white/10 hover:bg-white/20 dark:bg-gray-800/10 dark:hover:bg-gray-800/20 backdrop-blur"
+                    >
+                      <ChevronRight className="h-5 w-5" />
+                    </Button>
+                  </motion.div>
                 </div>
               </div>
+
+              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-white/10 dark:bg-gray-800/10 backdrop-blur text-sm text-gray-600 dark:text-gray-400">
+                {currentIndex + 1} of {totalCount}
+              </div>
+            </>
+          )}
+        </div>
+
+        <div className="p-8 pt-16">
+          <div className="flex flex-col md:flex-row gap-8">
+            <div className="w-full md:w-1/3">
+              <PhotoFrame
+                src={editedMemory.photo}
+                alt="Memory"
+                caption={editedMemory.description}
+                style={editedMemory.frameStyle || "polaroid"}
+                effect={editedMemory.photoEffect || "none"}
+                className="mb-6"
+              />
             </div>
 
             <div className="w-full md:w-2/3">
@@ -204,10 +328,25 @@ function EditForm({ memory, onChange, onSave, onCancel, onPhotoUpload }: EditFor
   return (
     <motion.div
       key="edit"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      transition={{ duration: 0.2, ease: "linear" }}
+      initial={{ opacity: 0, y: 10, scale: 0.98 }}
+      animate={{ 
+        opacity: 1, 
+        y: 0, 
+        scale: 1,
+        transition: {
+          duration: 0.3,
+          ease: [0.4, 0, 0.2, 1]
+        }
+      }}
+      exit={{ 
+        opacity: 0, 
+        y: -10, 
+        scale: 0.98,
+        transition: {
+          duration: 0.2,
+          ease: [0.4, 0, 1, 1]
+        }
+      }}
       className="grid gap-6"
     >
       <div className="grid grid-cols-4 items-center gap-4">
@@ -267,13 +406,60 @@ function EditForm({ memory, onChange, onSave, onCancel, onPhotoUpload }: EditFor
         <Label htmlFor="edit-photo" className="text-right">
           Photo
         </Label>
-        <Input
-          id="edit-photo"
-          type="file"
-          accept="image/*"
-          onChange={onPhotoUpload}
-          className="col-span-3"
-        />
+        <div className="col-span-3 flex items-center gap-2">
+          <Button 
+            type="button"
+            variant="outline"
+            className="w-[120px]"
+            onClick={() => document.getElementById('edit-photo')?.click()}
+          >
+            Choose File
+          </Button>
+          <span className="text-sm text-gray-500 dark:text-gray-400 truncate">
+            {memory.photo ? getFileNameFromPath(memory.photo) : 'No file chosen'}
+          </span>
+          <Input
+            id="edit-photo"
+            type="file"
+            accept="image/*"
+            onChange={onPhotoUpload}
+            className="hidden"
+          />
+        </div>
+      </div>
+
+      <div className="grid grid-cols-4 items-center gap-4">
+        <Label htmlFor="edit-frame-style" className="text-right">
+          Frame Style
+        </Label>
+        <select
+          id="edit-frame-style"
+          value={memory.frameStyle || 'polaroid'}
+          onChange={(e) => onChange({ ...memory, frameStyle: e.target.value as PhotoFrameStyle })}
+          className="col-span-3 form-select"
+        >
+          <option value="polaroid">Polaroid</option>
+          <option value="vintage">Vintage</option>
+          <option value="modern">Modern</option>
+          <option value="classic">Classic</option>
+        </select>
+      </div>
+
+      <div className="grid grid-cols-4 items-center gap-4">
+        <Label htmlFor="edit-photo-effect" className="text-right">
+          Photo Effect
+        </Label>
+        <select
+          id="edit-photo-effect"
+          value={memory.photoEffect || 'none'}
+          onChange={(e) => onChange({ ...memory, photoEffect: e.target.value as PhotoEffect })}
+          className="col-span-3 form-select"
+        >
+          <option value="none">None</option>
+          <option value="snow">Snow</option>
+          <option value="christmas">Christmas Lights</option>
+          <option value="sparkles">Sparkles</option>
+        </select>
       </div>
 
       <div className="flex justify-end gap-2">
@@ -292,10 +478,25 @@ function ViewMode({ memory }: ViewModeProps) {
   return (
     <motion.div
       key="view"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      transition={{ duration: 0.2, ease: "linear" }}
+      initial={{ opacity: 0, y: 10, scale: 0.98 }}
+      animate={{ 
+        opacity: 1, 
+        y: 0, 
+        scale: 1,
+        transition: {
+          duration: 0.3,
+          ease: [0.4, 0, 0.2, 1]
+        }
+      }}
+      exit={{ 
+        opacity: 0, 
+        y: -10, 
+        scale: 0.98,
+        transition: {
+          duration: 0.2,
+          ease: [0.4, 0, 1, 1]
+        }
+      }}
       className="prose dark:prose-invert max-w-none"
     >
       <h2 className="text-2xl font-semibold mb-4">
@@ -306,4 +507,18 @@ function ViewMode({ memory }: ViewModeProps) {
       </p>
     </motion.div>
   )
+}
+
+function getFileNameFromPath(path: string | undefined) {
+  if (!path) return ''
+  // If it's a base64 string (newly uploaded photo)
+  if (path.startsWith('data:')) {
+    return 'Selected photo'
+  }
+  // If it's a URL (existing photo)
+  if (path.startsWith('http') || path.startsWith('blob:')) {
+    return 'Current photo'
+  }
+  // For regular file paths
+  return path.split('/').pop()?.split('\\').pop() || ''
 } 
