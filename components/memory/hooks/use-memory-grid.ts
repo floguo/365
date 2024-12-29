@@ -1,9 +1,8 @@
 import { eachDayOfInterval, getDay, addDays, subDays } from 'date-fns'
 
 export function useMemoryGrid() {
-  // Generate dates from the Sunday before November 1, 2024 to the last Saturday of October 2025
-  const startDate = subDays(new Date(2024, 10, 1), getDay(new Date(2024, 10, 1))) // Sunday before November 1, 2024
-  const endDate = subDays(addDays(new Date(2025, 10, 1), 7), getDay(addDays(new Date(2025, 10, 1), 7)) + 1) // Last Saturday of October 2025
+  const startDate = subDays(new Date(2023, 12, 1), getDay(new Date(2023, 12, 1))) // Sunday before start date
+  const endDate = subDays(addDays(new Date(2024, 12, 1), 7), getDay(addDays(new Date(2024, 12, 1), 7)) + 1) // last Saturday after end date
   const days = eachDayOfInterval({ start: startDate, end: endDate })
 
   // Calculate the number of weeks

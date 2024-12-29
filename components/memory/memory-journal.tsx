@@ -85,6 +85,7 @@ export default function MemoryJournal() {
         width: `${componentWidth}px`,
         minWidth: `${componentWidth}px`,
         maxWidth: '100%',
+        height: '100%',
       }}
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
@@ -95,7 +96,7 @@ export default function MemoryJournal() {
     >
       <div className="flex justify-between items-center mb-2 h-10">
         <h2 className="text-base font-semibold text-gray-900 dark:text-gray-100">
-          {memories.length} memories together
+          {memories.length} memories this year
         </h2>
         <AddMemoryDialog 
           isOpen={isDialogOpen}

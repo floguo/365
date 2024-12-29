@@ -54,9 +54,8 @@ export default function MemoryJournal() {
     intensity: 1,
   })
 
-  // Generate dates from the Sunday before November 1, 2024 to the last Saturday of October 2025
-  const startDate = subDays(new Date(2024, 10, 1), getDay(new Date(2024, 10, 1))) // Sunday before November 1, 2024
-  const endDate = subDays(addDays(new Date(2025, 10, 1), 7), getDay(addDays(new Date(2025, 10, 1), 7)) + 1) // Last Saturday of October 2025
+  const startDate = subDays(new Date(2024, 11, 1), getDay(new Date(2024, 11, 1))) 
+  const endDate = subDays(addDays(new Date(2024, 12, 31), 7), getDay(addDays(new Date(2024, 12, 31), 7)) + 1) 
   const days = eachDayOfInterval({ start: startDate, end: endDate })
 
   // Calculate the number of weeks

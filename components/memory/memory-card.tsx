@@ -9,14 +9,12 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { MoreVertical, ChevronLeft, ChevronRight } from "lucide-react"
 import { Memory, type MemoryCardProps } from './types'
 import { useState, useEffect, useRef } from 'react'
-import { PhotoEffect, PhotoFrame, PhotoFrameStyle } from './photo-frame'
 
 interface EditFormProps {
   memory: Memory
   onChange: (memory: Memory) => void
   onSave: () => void
   onCancel: () => void
-  onPhotoUpload: (e: React.ChangeEvent<HTMLInputElement>) => void
 }
 
 interface ViewModeProps {
@@ -38,26 +36,6 @@ function DateMemories({
 }) {
   const dayMemories = memories
     .filter(m => isSameDay(m.date, date))
-    .sort((a, b) => a.id.localeCompare(b.id))
-
-  return (
-    <div className="absolute top-4 left-4 z-10">
-      <div className="flex flex-col gap-1">
-        {dayMemories.map((memory) => (
-          <motion.button
-            key={memory.id}
-            onClick={() => onSelectMemory(memory)}
-            className={`px-2 py-1 text-sm rounded-md text-left hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors
-              ${memory.id === selectedId ? 'bg-gray-100 dark:bg-gray-700' : ''}`}
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-          >
-            {memory.description}
-          </motion.button>
-        ))}
-      </div>
-    </div>
-  )
 }
 
 export function MemoryCard({ 
@@ -95,29 +73,8 @@ export function MemoryCard({
     }
   }, [isEditing])
 
-  const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (file) {
-      const reader = new FileReader()
-      reader.onloadend = () => {
-        setEditedMemory(prev => ({ ...prev, photo: reader.result as string }))
-      }
-      reader.readAsDataURL(file)
-    }
-  }
-
-  const handleDragEnd = (event: any, info: any) => {
-    const DRAG_THRESHOLD = 50
-    if (info.offset.x > DRAG_THRESHOLD && onNext) {
-      setDragDirection('right')
-      onNext()
-    } else if (info.offset.x < -DRAG_THRESHOLD && onPrev) {
-      setDragDirection('left')
-      onPrev()
-    }
-  }
-
   return (
+    // Animate the edit and delete buttons
     <motion.div
       layout="position"
       initial={{ opacity: 0, height: 0 }}
@@ -153,12 +110,6 @@ export function MemoryCard({
     >
       <motion.div
         ref={contentRef}
-        drag="x"
-        dragControls={dragControls}
-        dragConstraints={{ left: 0, right: 0 }}
-        dragElastic={0.2}
-        onDragEnd={handleDragEnd}
-        dragDirectionLock
         initial={false}
         animate={{ 
           x: 0,
@@ -181,15 +132,9 @@ export function MemoryCard({
         }}
         className="bg-white dark:bg-gray-800 rounded-lg relative"
       >
-        <DateMemories
-          date={memory.date}
-          memories={memories}
-          onSelect={m => onSelectMemory(m)}
-          selectedId={memory.id}
-          onSelectMemory={onSelectMemory}
-        />
 
-        <div className="absolute top-4 right-4 z-10">
+        {/* Edit and delete buttons */}
+        <div className="absolute top-4 right-0 z-10">
           {!isEditing && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -239,12 +184,13 @@ export function MemoryCard({
             </DropdownMenu>
           )}
         </div>
-
+        
+        {/* Navigation buttons */}
         <div className="absolute inset-0 pointer-events-none">
           {!isEditing && (
             <>
-              <div className="h-full flex items-center justify-between">
-                <div className="pointer-events-auto pl-2">
+              <div className="h-full absolute top-0 right-0 flex items-center gap-2">
+                <div className="pointer-events-auto">
                   <motion.div
                     whileHover={{ scale: 1.1 }}
                     whileTap={{ scale: 0.95 }}
@@ -253,14 +199,14 @@ export function MemoryCard({
                       variant="ghost"
                       size="icon"
                       onClick={() => onPrev ? onPrev() : setEditedMemory(memories[memories.length - 1])}
-                      className="h-9 w-9 rounded-full bg-white/10 hover:bg-white/20 dark:bg-gray-800/10 dark:hover:bg-gray-800/20 backdrop-blur"
+                      className="h-9 w-9 text-gray-400 rounded-sm border border-gray-100 dark:border-gray-700 bg-white/10 hover:bg-white/20 backdrop-blur"
                     >
                       <ChevronLeft className="h-5 w-5" />
                     </Button>
                   </motion.div>
                 </div>
 
-                <div className="pointer-events-auto pr-2">
+                <div className="pointer-events-auto">
                   <motion.div
                     whileHover={{ scale: 1.1 }}
                     whileTap={{ scale: 0.95 }}
@@ -269,7 +215,7 @@ export function MemoryCard({
                       variant="ghost"
                       size="icon"
                       onClick={() => onNext ? onNext() : setEditedMemory(memories[0])}
-                      className="h-9 w-9 rounded-full bg-white/10 hover:bg-white/20 dark:bg-gray-800/10 dark:hover:bg-gray-800/20 backdrop-blur"
+                      className="h-9 w-9 text-gray-400 rounded-sm border border-gray-100 dark:border-gray-700 bg-white/10 hover:bg-white/20 backdrop-blur"
                     >
                       <ChevronRight className="h-5 w-5" />
                     </Button>
@@ -277,26 +223,16 @@ export function MemoryCard({
                 </div>
               </div>
 
-              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-white/10 dark:bg-gray-800/10 backdrop-blur text-sm text-gray-600 dark:text-gray-400">
+              <div className="absolute bottom-1 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-white/10 dark:bg-gray-800/10 backdrop-blur text-sm text-gray-400 dark:text-gray-400">
                 {currentIndex + 1} of {totalCount}
               </div>
             </>
           )}
         </div>
 
-        <div className="p-8 pt-16">
+        {/* Journal entry content */}
+        <div className="py-6 px-8 pb-16">
           <div className="flex flex-col md:flex-row gap-8">
-            <div className="w-full md:w-1/3">
-              <PhotoFrame
-                src={editedMemory.photo}
-                alt="Memory"
-                caption={editedMemory.description}
-                style={editedMemory.frameStyle || "polaroid"}
-                effect={editedMemory.photoEffect || "none"}
-                className="mb-6"
-              />
-            </div>
-
             <div className="w-full md:w-2/3">
               <AnimatePresence mode="wait" initial={false}>
                 {isEditing ? (
@@ -305,7 +241,6 @@ export function MemoryCard({
                     onChange={setEditedMemory}
                     onSave={() => onEdit(editedMemory)}
                     onCancel={onEditCancel}
-                    onPhotoUpload={handlePhotoUpload}
                   />
                 ) : (
                   <ViewMode memory={memory} />
@@ -319,7 +254,8 @@ export function MemoryCard({
   )
 }
 
-function EditForm({ memory, onChange, onSave, onCancel, onPhotoUpload }: EditFormProps) {
+// Edit form for memory
+function EditForm({ memory, onChange, onSave, onCancel}: EditFormProps) {
   const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const date = e.target.value ? new Date(e.target.value + 'T00:00:00') : new Date()
     onChange({ ...memory, date })
@@ -375,16 +311,21 @@ function EditForm({ memory, onChange, onSave, onCancel, onPhotoUpload }: EditFor
       </div>
 
       <div className="grid grid-cols-4 items-start gap-4">
-        <Label htmlFor="edit-journalEntry" className="text-right mt-2">
-          Journal Entry
+        <Label
+          htmlFor="edit-journalEntry"
+          className="text-right self-start pr-2"
+        >
+        Journal Entry
         </Label>
         <Textarea
           id="edit-journalEntry"
           value={memory.journalEntry}
-          onChange={(e) => onChange({ ...memory, journalEntry: e.target.value })}
+          onChange={(e) =>
+            onChange({ ...memory, journalEntry: e.target.value })
+          }
           className="col-span-3"
           rows={8}
-        />
+              />
       </div>
 
       <div className="grid grid-cols-4 items-center gap-4">
@@ -400,66 +341,6 @@ function EditForm({ memory, onChange, onSave, onCancel, onPhotoUpload }: EditFor
           onChange={(e) => onChange({ ...memory, intensity: parseInt(e.target.value) as 1 | 2 | 3 | 4 })}
           className="col-span-3"
         />
-      </div>
-
-      <div className="grid grid-cols-4 items-center gap-4">
-        <Label htmlFor="edit-photo" className="text-right">
-          Photo
-        </Label>
-        <div className="col-span-3 flex items-center gap-2">
-          <Button 
-            type="button"
-            variant="outline"
-            className="w-[120px]"
-            onClick={() => document.getElementById('edit-photo')?.click()}
-          >
-            Choose File
-          </Button>
-          <span className="text-sm text-gray-500 dark:text-gray-400 truncate">
-            {memory.photo ? getFileNameFromPath(memory.photo) : 'No file chosen'}
-          </span>
-          <Input
-            id="edit-photo"
-            type="file"
-            accept="image/*"
-            onChange={onPhotoUpload}
-            className="hidden"
-          />
-        </div>
-      </div>
-
-      <div className="grid grid-cols-4 items-center gap-4">
-        <Label htmlFor="edit-frame-style" className="text-right">
-          Frame Style
-        </Label>
-        <select
-          id="edit-frame-style"
-          value={memory.frameStyle || 'polaroid'}
-          onChange={(e) => onChange({ ...memory, frameStyle: e.target.value as PhotoFrameStyle })}
-          className="col-span-3 form-select"
-        >
-          <option value="polaroid">Polaroid</option>
-          <option value="vintage">Vintage</option>
-          <option value="modern">Modern</option>
-          <option value="classic">Classic</option>
-        </select>
-      </div>
-
-      <div className="grid grid-cols-4 items-center gap-4">
-        <Label htmlFor="edit-photo-effect" className="text-right">
-          Photo Effect
-        </Label>
-        <select
-          id="edit-photo-effect"
-          value={memory.photoEffect || 'none'}
-          onChange={(e) => onChange({ ...memory, photoEffect: e.target.value as PhotoEffect })}
-          className="col-span-3 form-select"
-        >
-          <option value="none">None</option>
-          <option value="snow">Snow</option>
-          <option value="christmas">Christmas Lights</option>
-          <option value="sparkles">Sparkles</option>
-        </select>
       </div>
 
       <div className="flex justify-end gap-2">
@@ -484,7 +365,7 @@ function ViewMode({ memory }: ViewModeProps) {
         y: 0, 
         scale: 1,
         transition: {
-          duration: 0.3,
+          duration: 0.1,
           ease: [0.4, 0, 0.2, 1]
         }
       }}
@@ -493,13 +374,13 @@ function ViewMode({ memory }: ViewModeProps) {
         y: -10, 
         scale: 0.98,
         transition: {
-          duration: 0.2,
+          duration: 0.1,
           ease: [0.4, 0, 1, 1]
         }
       }}
       className="prose dark:prose-invert max-w-none"
     >
-      <h2 className="text-2xl font-semibold mb-4">
+      <h2 className="text-2xl font-semibold tracking-tight mb-4">
         {format(memory.date, 'MMMM d, yyyy')}
       </h2>
       <p className="text-gray-700 dark:text-gray-300 whitespace-pre-wrap leading-relaxed">
@@ -507,18 +388,4 @@ function ViewMode({ memory }: ViewModeProps) {
       </p>
     </motion.div>
   )
-}
-
-function getFileNameFromPath(path: string | undefined) {
-  if (!path) return ''
-  // If it's a base64 string (newly uploaded photo)
-  if (path.startsWith('data:')) {
-    return 'Selected photo'
-  }
-  // If it's a URL (existing photo)
-  if (path.startsWith('http') || path.startsWith('blob:')) {
-    return 'Current photo'
-  }
-  // For regular file paths
-  return path.split('/').pop()?.split('\\').pop() || ''
 } 

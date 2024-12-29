@@ -125,9 +125,9 @@ export function MemoryGrid({
                         <TooltipContent>
                           {date && (
                             <>
-                              <p className="font-medium">{format(date, 'MMM d, yyyy')}</p>
+                              <p className="font-medium font-mono text-xs opacity-70">{format(date, 'MMM d, yyyy')}</p>
                               {memories.length > 0 ? (
-                                <ul className="mt-1 space-y-1">
+                                <ul className="space-y-1">
                                   {getMemoriesForDate(date).map(memory => (
                                     <li key={memory.id} className="text-sm">
                                       {memory.description}
