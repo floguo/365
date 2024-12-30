@@ -28,5 +28,5 @@ npm run dev
 
 ## TODO
 
-[ ] Add database integration
-[ ] Fix photo upload
+- [ ] Add database integration<br>
+- [ ] Fix photo upload
