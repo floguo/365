@@ -1,12 +1,13 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
-import { format } from 'date-fns'
+import format from 'date-fns/format'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 import type { AddMemoryDialogProps, Memory } from './types'
+import DatePicker from "@/components/ui/date-picker"
 
 export function AddMemoryDialog({
   isOpen,
@@ -89,13 +90,12 @@ export function AddMemoryDialog({
             <Label htmlFor="date" className="text-right">
               Date
             </Label>
-            <Input
-              id="date"
-              type="date"
-              value={newMemory.date ? format(newMemory.date, 'yyyy-MM-dd') : ''}
-              onChange={handleDateChange}
-              className="col-span-3"
-            />
+            <div className="col-span-3">
+              <DatePicker
+                date={newMemory.date || new Date()}
+                onSelect={(date) => date && setNewMemory(prev => ({ ...prev, date }))}
+              />
+            </div>
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="description" className="text-right">

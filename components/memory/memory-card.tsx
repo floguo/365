@@ -9,6 +9,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { MoreVertical, ChevronLeft, ChevronRight } from "lucide-react"
 import { Memory, type MemoryCardProps } from './types'
 import { useState, useEffect, useRef } from 'react'
+import DatePicker from "@/components/ui/date-picker"
 
 interface EditFormProps {
   memory: Memory
@@ -289,13 +290,12 @@ function EditForm({ memory, onChange, onSave, onCancel}: EditFormProps) {
         <Label htmlFor="edit-date" className="text-right">
           Date
         </Label>
-        <Input
-          id="edit-date"
-          type="date"
-          value={format(memory.date, 'yyyy-MM-dd')}
-          onChange={handleDateChange}
-          className="col-span-3"
-        />
+        <div className="col-span-3">
+          <DatePicker
+            date={memory.date}
+            onSelect={(date) => date && onChange({ ...memory, date })}
+          />
+        </div>
       </div>
 
       <div className="grid grid-cols-4 items-center gap-4">
