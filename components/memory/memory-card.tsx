@@ -315,7 +315,7 @@ function EditForm({ memory, onChange, onSave, onCancel}: EditFormProps) {
       <div className="grid grid-cols-4 items-start gap-4">
         <Label
           htmlFor="edit-journalEntry"
-          className="text-right self-start pr-2"
+          className="text-right pt-2"
         >
           Reflection
         </Label>
@@ -323,9 +323,7 @@ function EditForm({ memory, onChange, onSave, onCancel}: EditFormProps) {
           id="edit-journalEntry"
           placeholder="Jot down what happened & how you felt"
           value={memory.journalEntry}
-          onChange={(e) =>
-            onChange({ ...memory, journalEntry: e.target.value })
-          }
+          onChange={(e) => onChange({ ...memory, journalEntry: e.target.value })}
           className="col-span-3"
           rows={8}
         />
@@ -389,7 +387,7 @@ function ViewMode({ memory }: ViewModeProps) {
       <h2 className="text-2xl font-semibold tracking-tight mb-4">
         {format(memory.date, 'MMMM d, yyyy')}
       </h2>
-      <p className="text-gray-700 dark:text-gray-300 whitespace-pre-wrap leading-relaxed">
+      <p className="text-gray-700 dark:text-gray-300 whitespace-pre-wrap leading-normal">
         {memory.journalEntry || 'No journal entry for this memory.'}
       </p>
     </motion.div>

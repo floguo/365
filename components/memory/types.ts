@@ -5,9 +5,6 @@ export type Memory = {
   description: string
   journalEntry?: string
   intensity: 1 | 2 | 3 | 4
-  photo?: string
-  frameStyle?: PhotoFrameStyle
-  photoEffect?: PhotoEffect
 }
 
 export interface MemoryGridProps {
@@ -41,12 +38,12 @@ export interface AddMemoryDialogProps {
   onAdd: (memory: Omit<Memory, "id">) => void
 }
 
-export const intensityColors = {
-  0: 'bg-[#ebedf0] dark:bg-gray-800',
-  1: 'bg-emerald-100 dark:bg-emerald-900/30',
-  2: 'bg-emerald-200 dark:bg-emerald-900/50',
-  3: 'bg-emerald-300 dark:bg-emerald-900/70',
-  4: 'bg-emerald-400 dark:bg-emerald-900/90'
+export const intensityColors: Record<0 | 1 | 2 | 3 | 4, string> = {
+  0: 'bg-gray-100 border border-gray-200/30',
+  1: 'bg-green-200 border border-green-300/30',
+  2: 'bg-green-500',
+  3: 'bg-green-700',
+  4: 'bg-green-900'
 } as const
 
 // Add other type definitions 

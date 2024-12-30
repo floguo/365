@@ -1,0 +1,18 @@
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+generator client {
+  provider = "prisma/client"
+}
+
+model Memory {
+  id           String   @id @default(cuid())
+  date         DateTime
+  description  String
+  journalEntry String?
+  intensity    Int
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}

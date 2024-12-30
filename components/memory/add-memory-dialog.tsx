@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 import type { AddMemoryDialogProps, Memory } from './types'
 import DatePicker from "@/components/ui/date-picker"
+import { X } from "lucide-react"
 
 export function AddMemoryDialog({
   isOpen,
@@ -59,6 +60,14 @@ export function AddMemoryDialog({
         </motion.div>
       </DialogTrigger>
       <DialogContent className="max-w-xl">
+        <button 
+          className="absolute right-4 top-4 rounded-sm opacity-70 transition-opacity hover:opacity-100 
+            focus:outline-none focus:ring-0 active:ring-0 focus-visible:ring-0 focus-visible:outline-none
+            disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground"
+        >
+          <X className="h-4 w-4" />
+          <span className="sr-only">Close</span>
+        </button>
         <DialogHeader>
           <DialogTitle>Add a New Memory</DialogTitle>
         </DialogHeader>
@@ -97,8 +106,8 @@ export function AddMemoryDialog({
               className="col-span-3"
             />
           </div>
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="journalEntry" className="text-right">
+          <div className="grid grid-cols-4 items-start gap-4">
+            <Label htmlFor="journalEntry" className="text-right pt-2">
               Reflection
             </Label>
             <Textarea

@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog"
-import './memory-journal.css'
+import { intensityColors } from '@/components/memory/types'
 
 type Memory = {
   id: string
@@ -19,14 +19,6 @@ type Memory = {
   journalEntry?: string
   intensity: 1 | 2 | 3 | 4
   photo?: string
-}
-
-const intensityColors = {
-  0: 'bg-[#ebedf0] dark:bg-gray-800',
-  1: 'bg-[#9be9a8] dark:bg-emerald-900',
-  2: 'bg-[#40c463] dark:bg-emerald-700',
-  3: 'bg-[#30a14e] dark:bg-emerald-600',
-  4: 'bg-[#216e39] dark:bg-emerald-500'
 }
 
 const weekdays = ['Mon', 'Wed', 'Fri']
@@ -158,21 +150,6 @@ export default function MemoryJournal() {
     }
   }
 
-  const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (file) {
-      const reader = new FileReader()
-      reader.onloadend = () => {
-        if (isEditing && selectedMemory) {
-          setSelectedMemory(prev => ({ ...prev, photo: reader.result as string }))
-        } else {
-          setNewMemory(prev => ({ ...prev, photo: reader.result as string }))
-        }
-      }
-      reader.readAsDataURL(file)
-    }
-  }
-
   return (
     <LayoutGroup>
       <motion.div 
@@ -239,27 +216,7 @@ export default function MemoryJournal() {
                       rows={5}
                     />
                   </div>
-                  <div className="grid grid-cols-4 items-center gap-4">
-                    <Label htmlFor="photo" className="text-right">
-                      Photo
-                    </Label>
-                    <Input
-                      id="photo"
-                      type="file"
-                      accept="image/*"
-                      onChange={handlePhotoUpload}
-                      className="col-span-3"
-                    />
                   </div>
-                  {newMemory.photo && (
-                    <div className="col-span-4 flex justify-center">
-                      <div className="polaroid">
-                        <img src={newMemory.photo} alt="Memory preview" className="w-full h-auto" />
-                        <div className="caption">{newMemory.description || 'New memory'}</div>
-                      </div>
-                    </div>
-                  )}
-                </div>
                 <Button onClick={handleAddMemory}>Add Memory</Button>
               </DialogContent>
             </Dialog>
@@ -344,7 +301,10 @@ export default function MemoryJournal() {
           <motion.div layout="position" className="mt-4 flex items-center gap-1 text-xs text-gray-600 dark:text-gray-400">
             <span>Less</span>
             {[0, 1, 2, 3, 4].map((intensity) => (
-              <div key={intensity} className={`w-[10px] h-[10px] ${intensityColors[intensity]} rounded-sm`} />
+              <div 
+                key={intensity} 
+                className={`w-[10px] h-[10px] ${intensityColors[intensity as keyof typeof intensityColors]} rounded-sm`} 
+              />
             ))}
             <span>More</span>
           </motion.div>
@@ -367,16 +327,6 @@ export default function MemoryJournal() {
               <motion.div layout className="p-8">
                 <div className="flex flex-col md:flex-row gap-8">
                   <div className="w-full md:w-1/3 flex flex-col">
-                    <div className="polaroid mb-6">
-                      {selectedMemory.photo ? (
-                        <img src={selectedMemory.photo} alt="Memory" className="w-full h-auto rounded-sm" />
-                      ) : (
-                        <div className="w-full h-48 bg-gray-200 flex items-center justify-center text-gray-400 rounded-sm">No photo</div>
-                      )}
-                      <div className="caption mt-2">
-                        <span className="text-lg">{selectedMemory.description}</span>
-                      </div>
-                    </div>
                     <div className="mt-auto">
                       <div className="flex justify-between items-center">
                         {!isEditing && (
@@ -417,7 +367,7 @@ export default function MemoryJournal() {
                             id="edit-date"
                             type="date"
                             value={format(selectedMemory.date, 'yyyy-MM-dd')}
-                            onChange={(e) => setSelectedMemory(prev => ({ ...prev, date: new Date(e.target.value) }))}
+                            onChange={(e) => setSelectedMemory(prev => prev === null ? null : { ...prev, date: new Date(e.target.value) })}
                             className="col-span-3"
                           />
                         </div>
@@ -428,7 +378,7 @@ export default function MemoryJournal() {
                           <Input
                             id="edit-description"
                             value={selectedMemory.description}
-                            onChange={(e) => setSelectedMemory(prev => ({ ...prev, description: e.target.value }))}
+                            onChange={(e) => setSelectedMemory(prev => prev === null ? null : { ...prev, description: e.target.value })}
                             className="col-span-3"
                           />
                         </div>
@@ -439,11 +389,12 @@ export default function MemoryJournal() {
                           <Textarea
                             id="edit-journalEntry"
                             value={selectedMemory.journalEntry}
-                            onChange={(e) => setSelectedMemory(prev => ({ ...prev, journalEntry: e.target.value }))}
+                            onChange={(e) => setSelectedMemory(prev => prev === null ? null : { ...prev, journalEntry: e.target.value })}
                             className="col-span-3"
                             rows={8}
                           />
                         </div>
+                        {/* Significance scale */}
                         <div className="grid grid-cols-4 items-center gap-4">
                           <Label htmlFor="edit-intensity" className="text-right">
                             Intensity
@@ -454,19 +405,7 @@ export default function MemoryJournal() {
                             min="1"
                             max="4"
                             value={selectedMemory.intensity}
-                            onChange={(e) => setSelectedMemory(prev => ({ ...prev, intensity: parseInt(e.target.value) as 1 | 2 | 3 | 4 }))}
-                            className="col-span-3"
-                          />
-                        </div>
-                        <div className="grid grid-cols-4 items-center gap-4">
-                          <Label htmlFor="edit-photo" className="text-right">
-                            Photo
-                          </Label>
-                          <Input
-                            id="edit-photo"
-                            type="file"
-                            accept="image/*"
-                            onChange={handlePhotoUpload}
+                            onChange={(e) => setSelectedMemory(prev => prev === null ? null : { ...prev, intensity: parseInt(e.target.value) as 1 | 2 | 3 | 4 })}
                             className="col-span-3"
                           />
                         </div>
@@ -493,4 +432,3 @@ export default function MemoryJournal() {
     </LayoutGroup>
   )
 }
-
