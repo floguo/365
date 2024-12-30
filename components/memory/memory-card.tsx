@@ -233,21 +233,27 @@ export function MemoryCard({
 
         {/* Journal entry content */}
         <div className="py-6 px-8 pb-16">
-          <div className="flex flex-col md:flex-row gap-8">
-            <div className="w-full md:w-2/3">
-              <AnimatePresence mode="wait" initial={false}>
-                {isEditing ? (
-                  <EditForm 
-                    memory={editedMemory}
-                    onChange={setEditedMemory}
-                    onSave={() => onEdit(editedMemory)}
-                    onCancel={onEditCancel}
-                  />
-                ) : (
+          <div className="flex">
+            <AnimatePresence mode="wait" initial={false}>
+              {isEditing ? (
+                // Center the edit form
+                <div className="w-full flex justify-center">
+                  <div className="w-full max-w-2xl">
+                    <EditForm 
+                      memory={editedMemory}
+                      onChange={setEditedMemory}
+                      onSave={() => onEdit(editedMemory)}
+                      onCancel={onEditCancel}
+                    />
+                  </div>
+                </div>
+              ) : (
+                // Left align the view mode with 2/3 width
+                <div className="w-full w-2/3">
                   <ViewMode memory={memory} />
-                )}
-              </AnimatePresence>
-            </div>
+                </div>
+              )}
+            </AnimatePresence>
           </div>
         </div>
       </motion.div>
@@ -257,11 +263,6 @@ export function MemoryCard({
 
 // Edit form for memory
 function EditForm({ memory, onChange, onSave, onCancel}: EditFormProps) {
-  const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const date = e.target.value ? new Date(e.target.value + 'T00:00:00') : new Date()
-    onChange({ ...memory, date })
-  }
-
   return (
     <motion.div
       key="edit"
@@ -300,10 +301,11 @@ function EditForm({ memory, onChange, onSave, onCancel}: EditFormProps) {
 
       <div className="grid grid-cols-4 items-center gap-4">
         <Label htmlFor="edit-description" className="text-right">
-          Description
+          Memory Title
         </Label>
         <Input
           id="edit-description"
+          placeholder="What's this memory about?"
           value={memory.description}
           onChange={(e) => onChange({ ...memory, description: e.target.value })}
           className="col-span-3"
@@ -315,32 +317,36 @@ function EditForm({ memory, onChange, onSave, onCancel}: EditFormProps) {
           htmlFor="edit-journalEntry"
           className="text-right self-start pr-2"
         >
-        Journal Entry
+          Reflection
         </Label>
         <Textarea
           id="edit-journalEntry"
+          placeholder="Jot down what happened & how you felt"
           value={memory.journalEntry}
           onChange={(e) =>
             onChange({ ...memory, journalEntry: e.target.value })
           }
           className="col-span-3"
           rows={8}
-              />
+        />
       </div>
 
       <div className="grid grid-cols-4 items-center gap-4">
         <Label htmlFor="edit-intensity" className="text-right">
-          Intensity
+          Significance
         </Label>
-        <Input
-          id="edit-intensity"
-          type="number"
-          min="1"
-          max="4"
-          value={memory.intensity}
-          onChange={(e) => onChange({ ...memory, intensity: parseInt(e.target.value) as 1 | 2 | 3 | 4 })}
-          className="col-span-3"
-        />
+        <div className="col-span-3">
+          <Input
+            id="edit-intensity"
+            type="number"
+            min="1"
+            max="4"
+            placeholder="How significant is this memory? (1-4)"
+            value={memory.intensity}
+            onChange={(e) => onChange({ ...memory, intensity: parseInt(e.target.value) as 1 | 2 | 3 | 4 })}
+            className="col-span-3"
+          />
+        </div>
       </div>
 
       <div className="flex justify-end gap-2">

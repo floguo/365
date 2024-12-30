@@ -1,6 +1,5 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
-import format from 'date-fns/format'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -20,17 +19,6 @@ export function AddMemoryDialog({
     journalEntry: '',
     intensity: 1,
   })
-
-  const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (file) {
-      const reader = new FileReader()
-      reader.onloadend = () => {
-        setNewMemory(prev => ({ ...prev, photo: reader.result as string }))
-      }
-      reader.readAsDataURL(file)
-    }
-  }
 
   const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const date = e.target.value ? new Date(e.target.value + 'T00:00:00') : new Date()
@@ -99,10 +87,11 @@ export function AddMemoryDialog({
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="description" className="text-right">
-              Description
+              Memory Title
             </Label>
             <Input
               id="description"
+              placeholder="What's this memory about?"
               value={newMemory.description}
               onChange={(e) => setNewMemory(prev => ({ ...prev, description: e.target.value }))}
               className="col-span-3"
@@ -110,10 +99,11 @@ export function AddMemoryDialog({
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="journalEntry" className="text-right">
-              Journal Entry
+              Reflection
             </Label>
             <Textarea
               id="journalEntry"
+              placeholder="Jot down what happened & how you felt"
               value={newMemory.journalEntry}
               onChange={(e) => setNewMemory(prev => ({ ...prev, journalEntry: e.target.value }))}
               className="col-span-3"
@@ -122,54 +112,28 @@ export function AddMemoryDialog({
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="intensity" className="text-right">
-              Intensity
+              Significance
             </Label>
-            <Input
-              id="intensity"
-              type="number"
-              min="1"
-              max="4"
-              value={newMemory.intensity}
-              onChange={(e) => setNewMemory(prev => ({ ...prev, intensity: parseInt(e.target.value) as 1 | 2 | 3 | 4 }))}
-              className="col-span-3"
-            />
+            <div className="col-span-3">
+              <Input
+                id="intensity"
+                type="number"
+                min="1"
+                max="4"
+                placeholder="How significant was this memory? (1-4)"
+                value={newMemory.intensity}
+                onChange={(e) => setNewMemory(prev => ({ ...prev, intensity: parseInt(e.target.value) as 1 | 2 | 3 | 4 }))}
+                className="col-span-3"
+              />
+
+            </div>
           </div>
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="photo" className="text-right">
-              Photo
-            </Label>
-            <Input
-              id="photo"
-              type="file"
-              accept="image/*"
-              onChange={handlePhotoUpload}
-              className="col-span-3"
-            />
-          </div>
-          {newMemory.photo && (
-            <motion.div 
-              className="col-span-4 flex justify-center"
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ 
-                opacity: 1, 
-                scale: 1,
-                transition: {
-                  duration: 0.3,
-                  ease: [0.4, 0, 0.2, 1]
-                }
-              }}
-            >
-              <div className="polaroid">
-                <img src={newMemory.photo} alt="Memory preview" className="w-full h-auto" />
-                <div className="caption text-sm">{newMemory.description || 'New memory'}</div>
-              </div>
-            </motion.div>
-          )}
         </motion.div>
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.2 }}
+          className="flex justify-end"
         >
           <Button onClick={handleAdd}>Add Memory</Button>
         </motion.div>

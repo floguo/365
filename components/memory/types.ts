@@ -43,10 +43,10 @@ export interface AddMemoryDialogProps {
 
 export const intensityColors = {
   0: 'bg-[#ebedf0] dark:bg-gray-800',
-  1: 'bg-[#9be9a8] dark:bg-emerald-900',
-  2: 'bg-[#40c463] dark:bg-emerald-700',
-  3: 'bg-[#30a14e] dark:bg-emerald-600',
-  4: 'bg-[#216e39] dark:bg-emerald-500'
+  1: 'bg-emerald-100 dark:bg-emerald-900/30',
+  2: 'bg-emerald-200 dark:bg-emerald-900/50',
+  3: 'bg-emerald-300 dark:bg-emerald-900/70',
+  4: 'bg-emerald-400 dark:bg-emerald-900/90'
 } as const
 
 // Add other type definitions 
